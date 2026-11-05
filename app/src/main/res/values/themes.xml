@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.RetroPlay" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/desktop</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+    <color name="desktop">#0E0E16</color>
+    <color name="icon_bg">#24243A</color>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tiny LCD panel with spectrum bars and a play triangle -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#9A9CB2" android:pathData="M28,34h52v40h-52z" />
+    <path android:fillColor="#000000" android:pathData="M31,37h46v34h-46z" />
+    <path android:fillColor="#2AC83A" android:pathData="M35,60h4v8h-4zM41,54h4v14h-4zM47,49h4v19h-4zM53,57h4v11h-4z" />
+    <path android:fillColor="#E8C82A" android:pathData="M41,50h4v3h-4zM47,44h4v4h-4z" />
+    <path android:fillColor="#00E800" android:pathData="M61,45l12,9l-12,9z" />
+</vector>

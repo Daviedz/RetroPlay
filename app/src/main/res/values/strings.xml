@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">RetroPlay</string>
+    <string name="widget_description">RetroPlay player with live spectrum and controls</string>
+</resources>

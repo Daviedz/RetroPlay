@@ -1,0 +1,28 @@
+# Gradle / build output
+.gradle/
+.kotlin/
+build/
+app/build/
+app/release/
+*.apk
+*.aab
+
+# Local machine config
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Signing keys - never commit
+*.jks
+*.keystore
+*.p12
+/retroplay
+
+# OS
+.DS_Store
+Thumbs.db
