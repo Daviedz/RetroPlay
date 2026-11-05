@@ -1,0 +1,250 @@
+package com.retroplay.player.widget
+
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Rect
+import android.graphics.RectF
+import android.graphics.Shader
+import android.graphics.Typeface
+import android.util.DisplayMetrics
+import androidx.compose.ui.graphics.toArgb
+import com.retroplay.player.player.PlayState
+import com.retroplay.player.player.PlayerController
+import com.retroplay.player.player.VisMode
+import com.retroplay.player.player.formatClock
+import com.retroplay.player.ui.Skin
+import kotlin.math.abs
+import kotlin.math.min
+
+/**
+ * Draws the widget's LCD and sliders with plain android.graphics, mirroring the
+ * Compose drawing in ui/Widgets.kt so the widget looks like the app.
+ * [d] = pixels per dp for the bitmap.
+ */
+object WidgetRenderer {
+    private val mono: Typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+
+    // ---------------------------------------------------------------- LCD
+
+    fun lcd(c: PlayerController, s: Skin, wPx: Int, hPx: Int, d: Float, artMode: Boolean): Bitmap {
+        val w = wPx.coerceAtLeast(8)
+        val h = hPx.coerceAtLeast(8)
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        // Tag the bitmap's density so the widget's wrap_content ImageView shows it at
+        // exactly the dp size it was drawn for (this is what sets the display height).
+        bmp.density = (DisplayMetrics.DENSITY_DEFAULT * d).toInt()
+        val cv = Canvas(bmp)
+        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+        val pad = 5 * d
+        var left = pad
+        val right = w - pad
+
+        // Album cover on the left in ART mode
+        if (artMode) {
+            val size = h - 2 * pad
+            val dst = RectF(pad, pad, pad + size, pad + size)
+            val cover = if (c.currentTrack?.isStream == true) null else c.currentArt
+            if (cover != null && !cover.isRecycled) {
+                val side = min(cover.width, cover.height)
+                val sl = (cover.width - side) / 2
+                val st = (cover.height - side) / 2
+                val src = Rect(sl, st, sl + side, st + side)
+                cv.drawBitmap(cover, src, dst, Paint(Paint.FILTER_BITMAP_FLAG))
+            } else {
+                p.color = s.lcdDim.toArgb()
+                p.style = Paint.Style.STROKE
+                p.strokeWidth = d
+                cv.drawRect(dst, p)
+                p.style = Paint.Style.FILL
+                drawNote(cv, p, dst)
+            }
+            left = dst.right + 6 * d
+        }
+
+        // State glyph + clock
+        val stopped = c.playState == PlayState.STOPPED
+        val remaining = c.showRemaining && c.durationMs > 0
+        val ms = if (remaining) c.durationMs - c.positionMs else c.positionMs
+        val text = (if (remaining) "-" else "") + formatClock(ms)
+        val glyph = 8 * d
+        val gap = 5 * d
+        p.typeface = mono
+        var ts = h * 0.36f
+        p.textSize = ts
+        while (p.measureText(text) > right - left - glyph - gap && ts > 6 * d) {
+            ts -= d
+            p.textSize = ts
+        }
+        val fm = p.fontMetrics
+        val baseline = pad - fm.ascent * 0.92f
+        val capH = -fm.ascent * 0.7f
+        p.color = s.lcdText.toArgb()
+        drawStateGlyph(cv, p, c.playState, RectF(left, baseline - capH / 2 - glyph / 2, left + glyph, baseline - capH / 2 + glyph / 2))
+        p.color = (if (stopped) s.lcdDim else s.lcdText).toArgb()
+        cv.drawText(text, left + glyph + gap, baseline, p)
+
+        // Visualizer below
+        val visTop = baseline + 4 * d
+        val area = RectF(left, visTop, right, h - pad)
+        if (area.height() > 4 * d) drawVis(cv, c, s, area, d)
+        return bmp
+    }
+
+    private fun drawStateGlyph(cv: Canvas, p: Paint, st: PlayState, r: RectF) {
+        when (st) {
+            PlayState.PLAYING -> cv.drawPath(Path().apply {
+                moveTo(r.left + r.width() * 0.15f, r.top)
+                lineTo(r.right, r.centerY())
+                lineTo(r.left + r.width() * 0.15f, r.bottom)
+                close()
+            }, p)
+            PlayState.PAUSED -> {
+                cv.drawRect(r.left + r.width() * 0.1f, r.top, r.left + r.width() * 0.4f, r.bottom, p)
+                cv.drawRect(r.left + r.width() * 0.6f, r.top, r.left + r.width() * 0.9f, r.bottom, p)
+            }
+            PlayState.STOPPED -> cv.drawRect(
+                r.left + r.width() * 0.1f, r.top + r.height() * 0.1f,
+                r.right - r.width() * 0.1f, r.bottom - r.height() * 0.1f, p,
+            )
+        }
+    }
+
+    private fun drawNote(cv: Canvas, p: Paint, box: RectF) {
+        val u = box.width() / 5
+        val cx = box.centerX()
+        val cy = box.centerY()
+        cv.drawOval(RectF(cx - u * 0.9f, cy + u * 0.3f, cx + u * 0.1f, cy + u * 1.0f), p)
+        cv.drawRect(cx - u * 0.05f, cy - u * 1.2f, cx + u * 0.15f, cy + u * 0.7f, p)
+        cv.drawRect(cx - u * 0.05f, cy - u * 1.2f, cx + u * 0.9f, cy - u * 0.85f, p)
+    }
+
+    private fun drawVis(cv: Canvas, c: PlayerController, s: Skin, r: RectF, d: Float) {
+        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+        if (!c.hasVisPermission || c.visMode == VisMode.OFF) {
+            p.color = s.lcdDim.toArgb()
+            var x = r.left
+            while (x < r.right) {
+                cv.drawRect(x, r.bottom - 2 * d, x + d, r.bottom - d, p)
+                x += 3 * d
+            }
+            return
+        }
+        when (c.visMode) {
+            VisMode.SPECTRUM -> {
+                val bars = c.spectrum
+                val peaks = c.peaks
+                val n = bars.size
+                val slot = r.width() / n
+                val bw = slot * (if (s.isClassic) 0.8f else 0.66f)
+                val cols = s.visBars.map { it.toArgb() }.toIntArray()
+                p.shader = LinearGradient(0f, r.top, 0f, r.bottom, cols, null, Shader.TileMode.CLAMP)
+                for (i in 0 until n) {
+                    val x = r.left + i * slot
+                    val bh = bars[i] * r.height()
+                    if (bh > 0.5f) cv.drawRect(x, r.bottom - bh, x + bw, r.bottom, p)
+                }
+                p.shader = null
+                p.color = s.visPeak.toArgb()
+                for (i in 0 until n) {
+                    if (peaks[i] > 0.01f) {
+                        val x = r.left + i * slot
+                        val py = (r.bottom - peaks[i] * r.height() - 1.5f * d).coerceAtLeast(r.top)
+                        cv.drawRect(x, py, x + bw, py + 1.5f * d, p)
+                    }
+                }
+                if (!s.isClassic) {
+                    p.color = s.lcdBottom.copy(alpha = 0.8f).toArgb()
+                    var y = r.bottom - 3 * d
+                    while (y > r.top) {
+                        cv.drawRect(r.left, y, r.right, y + d, p)
+                        y -= 3 * d
+                    }
+                }
+            }
+            VisMode.SCOPE -> {
+                val wf = c.waveform
+                p.style = Paint.Style.STROKE
+                p.strokeWidth = 1.5f * d
+                if (wf.size > 1) {
+                    p.color = s.lcdText.toArgb()
+                    val path = Path()
+                    wf.forEachIndexed { i, v ->
+                        val x = r.left + i * r.width() / (wf.size - 1)
+                        val y = r.centerY() - v * r.height() / 2
+                        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                    }
+                    cv.drawPath(path, p)
+                } else {
+                    p.color = s.lcdDim.toArgb()
+                    cv.drawLine(r.left, r.centerY(), r.right, r.centerY(), p)
+                }
+            }
+            VisMode.OFF -> Unit
+        }
+    }
+
+    // ------------------------------------------------------------- sliders
+
+    /** Horizontal slider, value 0..1, same look as HBar in the app. */
+    fun slider(s: Skin, value: Float, fill: Int?, centered: Boolean, wPx: Int, hPx: Int, d: Float): Bitmap {
+        val w = wPx.coerceAtLeast(8).toFloat()
+        val h = hPx.coerceAtLeast(4).toFloat()
+        val bmp = Bitmap.createBitmap(w.toInt(), h.toInt(), Bitmap.Config.ARGB_8888)
+        val cv = Canvas(bmp)
+        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+        val v = value.coerceIn(0f, 1f)
+        if (s.isClassic) {
+            p.isAntiAlias = false
+            val th = min(16 * d, w)
+            val gh = h * 0.45f
+            val gy = (h - gh) / 2
+            p.color = s.groove.toArgb()
+            cv.drawRect(0f, gy, w, gy + gh, p)
+            val x = (w - th) * v
+            val cx = x + th / 2
+            if (fill != null) {
+                p.color = fill
+                if (centered) cv.drawRect(min(w / 2, cx), gy + 1, min(w / 2, cx) + abs(cx - w / 2), gy + gh - 1, p)
+                else cv.drawRect(0f, gy + 1, cx, gy + gh - 1, p)
+            }
+            p.shader = LinearGradient(0f, 0f, 0f, h, s.thumbTop.toArgb(), s.thumbBottom.toArgb(), Shader.TileMode.CLAMP)
+            cv.drawRect(x, 0f, x + th, h, p)
+            p.shader = null
+            val e = d.coerceAtLeast(1f)
+            p.color = 0xFFFFFFFF.toInt()
+            cv.drawRect(x, 0f, x + th, e, p)
+            cv.drawRect(x, 0f, x + e, h, p)
+            p.color = s.edgeDark.toArgb()
+            cv.drawRect(x, h - e, x + th, h, p)
+            cv.drawRect(x + th - e, 0f, x + th, h, p)
+            for (k in -1..1) {
+                val lx = cx + k * 3 * d
+                cv.drawRect(lx, h * 0.3f, lx + e, h * 0.7f, p)
+            }
+        } else {
+            val gh = 6 * d
+            val gy = (h - gh) / 2
+            p.color = s.groove.toArgb()
+            cv.drawRoundRect(RectF(0f, gy, w, gy + gh), gh / 2, gh / 2, p)
+            val rad = min(h / 2, 9 * d)
+            val cx = rad + (w - 2 * rad) * v
+            if (fill != null) {
+                p.color = fill
+                val l = if (centered) min(w / 2, cx) else 0f
+                val rr = if (centered) l + abs(cx - w / 2) else cx
+                cv.drawRoundRect(RectF(l, gy, rr, gy + gh), gh / 2, gh / 2, p)
+            }
+            p.shader = LinearGradient(0f, h / 2 - rad, 0f, h / 2 + rad, s.thumbTop.toArgb(), s.thumbBottom.toArgb(), Shader.TileMode.CLAMP)
+            cv.drawCircle(cx, h / 2, rad - d / 2, p)
+            p.shader = null
+            p.style = Paint.Style.STROKE
+            p.strokeWidth = d
+            p.color = s.edgeDark.toArgb()
+            cv.drawCircle(cx, h / 2, rad - d / 2, p)
+        }
+        return bmp
+    }
+}
