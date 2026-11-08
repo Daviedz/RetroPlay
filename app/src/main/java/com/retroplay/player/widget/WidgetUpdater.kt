@@ -168,15 +168,22 @@ object WidgetUpdater {
             // Set the display height explicitly too, rather than relying only on the bitmap size
             rv.setViewLayoutHeight(R.id.w_lcd, g.lcdDp.toFloat(), TypedValue.COMPLEX_UNIT_DIP)
         }
-        val pos = if (c.durationMs > 0) c.positionMs.toFloat() / c.durationMs else 0f
-        rv.setImageViewBitmap(R.id.w_seek, WidgetRenderer.slider(s, pos, s.seekFill.toArgb(), false, g.seekW, g.seekH, g.d))
+        val radio = c.currentTrack?.isStream == true
+        val pos = when {
+            radio -> com.retroplay.player.player.RadioSweep.fraction(
+                c.currentTrack, c.playState == com.retroplay.player.player.PlayState.PLAYING)
+            c.durationMs > 0 -> c.positionMs.toFloat() / c.durationMs
+            else -> 0f
+        }
+        val seekFill = 0xFFFFF59D.toInt()
+        rv.setImageViewBitmap(R.id.w_seek, WidgetRenderer.slider(s, pos, seekFill, false, g.seekW, g.seekH, g.d))
         if (!full) return rv
 
         val volFill = if (s.isClassic) volumeColor(c.volume) else s.volumeFill.toArgb()
         rv.setImageViewBitmap(R.id.w_vol, WidgetRenderer.slider(s, c.volume, volFill, false, g.volW, g.barH, g.d))
         rv.setImageViewBitmap(
             R.id.w_bal,
-            WidgetRenderer.slider(s, (c.balance + 1f) / 2f, s.balanceFill.toArgb(), true, g.balW, g.barH, g.d),
+            WidgetRenderer.slider(s, (c.balance + 1f) / 2f, (if (c.balance == 0f) 0xFF33C24A.toInt() else 0xFFE53935.toInt()), true, g.balW, g.barH, g.d),
         )
 
         // ---- skin

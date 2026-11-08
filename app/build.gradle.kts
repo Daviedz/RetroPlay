@@ -12,12 +12,21 @@ android {
         applicationId = "com.retroplay.player"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 8
+        versionName = "1.8"
     }
 
+    signingConfigs {
+        create("localRelease") {
+            storeFile = file(System.getProperty("user.home") + "/.android/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("localRelease")
             isMinifyEnabled = false
         }
     }

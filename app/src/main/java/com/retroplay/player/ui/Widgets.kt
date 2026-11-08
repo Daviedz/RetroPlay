@@ -1,5 +1,11 @@
 package com.retroplay.player.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -75,6 +81,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.retroplay.player.player.ArtLoader
 import com.retroplay.player.player.PlayState
+import com.retroplay.player.player.RadioSweep
 import com.retroplay.player.player.PlayerController
 import com.retroplay.player.player.Track
 import com.retroplay.player.player.VisMode
@@ -643,7 +650,8 @@ fun HBar(
             val x = (w - th) * v
             val cx = x + th / 2
             if (fill != null) {
-                if (centered) drawRect(fill, Offset(min(w / 2, cx), gy + 1), Size(abs(cx - w / 2), gh - 2))
+                if (centered && abs(v - 0.5f) < 0.002f) drawRect(fill, Offset(0f, gy + 1), Size(w, gh - 2))
+                else if (centered) drawRect(fill, Offset(min(w / 2, cx), gy + 1), Size(abs(cx - w / 2), gh - 2))
                 else drawRect(fill, Offset(0f, gy + 1), Size(cx, gh - 2))
             }
             bevelRect(Offset(x, 0f), Size(th, h), s.thumbTop, s.thumbBottom, Color.White, s.edgeDark)
@@ -659,7 +667,8 @@ fun HBar(
             val rad = (h / 2).coerceAtMost(9.dp.toPx())
             val cx = rad + (w - 2 * rad) * v
             if (fill != null) {
-                if (centered) drawRoundRect(fill, Offset(min(w / 2, cx), gy), Size(abs(cx - w / 2), gh), r)
+                if (centered && abs(v - 0.5f) < 0.002f) drawRoundRect(fill, Offset(0f, gy), Size(w, gh), r)
+                else if (centered) drawRoundRect(fill, Offset(min(w / 2, cx), gy), Size(abs(cx - w / 2), gh), r)
                 else drawRoundRect(fill, Offset(0f, gy), Size(cx, gh), r)
             }
             drawCircle(
@@ -708,17 +717,21 @@ fun VBar(value: Float, onChange: (Float) -> Unit, modifier: Modifier = Modifier)
     }
 }
 
+val SEEK_YELLOW = Color(0xFFFFF59D)
+
 /** Track position bar; only seeks when the finger lifts, like the original. Idle for live radio. */
 @Composable
 fun SeekBar(c: PlayerController, modifier: Modifier = Modifier) {
     val s = LocalSkin.current
     var drag by remember { mutableStateOf<Float?>(null) }
-    val live = if (c.durationMs > 0) (c.positionMs.toFloat() / c.durationMs).coerceIn(0f, 1f) else 0f
+    val isRadio = c.currentTrack?.isStream == true
+    val running = isRadio && c.playState == PlayState.PLAYING
+    val pos = if (c.durationMs > 0) (c.positionMs.toFloat() / c.durationMs).coerceIn(0f, 1f) else 0f
     HBar(
-        value = drag ?: live,
-        onChange = { if (c.durationMs > 0) drag = it },
+        value = if (isRadio) RadioSweep.fraction(c.currentTrack, running) else drag ?: pos,
+        onChange = { if (!isRadio && c.durationMs > 0) drag = it },
         modifier = modifier,
-        fill = if (s.isClassic) s.seekFill else s.seekFill,
+        fill = SEEK_YELLOW,
         onFinished = {
             drag?.let { c.seekTo(it) }
             drag = null

@@ -102,7 +102,7 @@ fun ClassicMainWindow(c: PlayerController) {
             FaceLabel("BAL", Modifier.width(26.dp))
             HBar(
                 (c.balance + 1f) / 2f, { c.setBalanceLevel(it * 2f - 1f) }, Modifier.weight(0.38f).fillMaxHeight(),
-                fill = s.balanceFill, centered = true,
+                fill = if (c.balance == 0f) Color(0xFF33C24A) else Color(0xFFE53935), centered = true,
             )
         }
         Spacer(Modifier.height(10.dp))
@@ -240,7 +240,7 @@ fun ModernMainWindow(c: PlayerController) {
             FaceLabel("BAL", Modifier.width(24.dp))
             HBar(
                 (c.balance + 1f) / 2f, { c.setBalanceLevel(it * 2f - 1f) }, Modifier.weight(0.4f).fillMaxHeight(),
-                fill = s.balanceFill, centered = true,
+                fill = if (c.balance == 0f) Color(0xFF33C24A) else Color(0xFFE53935), centered = true,
             )
         }
     }

@@ -207,7 +207,8 @@ object WidgetRenderer {
             val cx = x + th / 2
             if (fill != null) {
                 p.color = fill
-                if (centered) cv.drawRect(min(w / 2, cx), gy + 1, min(w / 2, cx) + abs(cx - w / 2), gy + gh - 1, p)
+                if (centered && abs(value - 0.5f) < 0.002f) cv.drawRect(0f, gy + 1, w, gy + gh - 1, p)
+                else if (centered) cv.drawRect(min(w / 2, cx), gy + 1, min(w / 2, cx) + abs(cx - w / 2), gy + gh - 1, p)
                 else cv.drawRect(0f, gy + 1, cx, gy + gh - 1, p)
             }
             p.shader = LinearGradient(0f, 0f, 0f, h, s.thumbTop.toArgb(), s.thumbBottom.toArgb(), Shader.TileMode.CLAMP)
@@ -233,8 +234,9 @@ object WidgetRenderer {
             val cx = rad + (w - 2 * rad) * v
             if (fill != null) {
                 p.color = fill
-                val l = if (centered) min(w / 2, cx) else 0f
-                val rr = if (centered) l + abs(cx - w / 2) else cx
+                val full = centered && abs(value - 0.5f) < 0.002f
+                val l = if (full) 0f else if (centered) min(w / 2, cx) else 0f
+                val rr = if (full) w else if (centered) l + abs(cx - w / 2) else cx
                 cv.drawRoundRect(RectF(l, gy, rr, gy + gh), gh / 2, gh / 2, p)
             }
             p.shader = LinearGradient(0f, h / 2 - rad, 0f, h / 2 + rad, s.thumbTop.toArgb(), s.thumbBottom.toArgb(), Shader.TileMode.CLAMP)
