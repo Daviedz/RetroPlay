@@ -90,7 +90,7 @@ object WidgetUpdater {
         else if (c.playState == PlayState.PLAYING && !appVisible) {
             val mgr = AppWidgetManager.getInstance(ctx)
             ids.forEach { id ->
-                try { mgr.partiallyUpdateAppWidget(id, build(ctx, c, id, full = false)) } catch (_: Exception) {}
+                try { mgr.partiallyUpdateAppWidget(id, build(ctx, c, id, full = false)) } catch (e: Throwable) { android.util.Log.w("RetroPlayWidget", "partial update failed", e) }
             }
         }
     }
@@ -100,7 +100,7 @@ object WidgetUpdater {
         lastSig = signature(ctx, c)
         val mgr = AppWidgetManager.getInstance(ctx)
         ids.forEach { id ->
-            try { mgr.updateAppWidget(id, build(ctx, c, id, full = true)) } catch (_: Exception) {}
+            try { mgr.updateAppWidget(id, build(ctx, c, id, full = true)) } catch (e: Throwable) { android.util.Log.w("RetroPlayWidget", "full update failed", e) }
         }
     }
 

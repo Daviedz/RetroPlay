@@ -204,7 +204,8 @@ class PlayerController(private val app: Application) {
         pollSystemVolume()
         mainScope.launch {
             while (isActive) {
-                tick()
+                // One bad tick must never kill the loop (it drives the clock, visualizer and widget)
+                try { tick() } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Throwable) { android.util.Log.w("RetroPlayWidget", "tick failed", e) }
                 delay(50)
             }
         }
@@ -467,7 +468,7 @@ class PlayerController(private val app: Application) {
 
     private fun tick() {
         if (tickCount++ % 5 == 0) pollSystemVolume()
-        if (tickCount % 10 == 0) try { WidgetUpdater.onTick(app, this) } catch (e: Exception) { android.util.Log.w("RetroPlayWidget", "widget tick failed", e) }
+        if (tickCount % 10 == 0) try { WidgetUpdater.onTick(app, this) } catch (e: Throwable) { android.util.Log.w("RetroPlayWidget", "widget tick failed", e) }
         if (engine.prepared && playState != PlayState.STOPPED) positionMs = engine.position.toLong()
         val s = spectrum
         val p = peaks
