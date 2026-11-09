@@ -88,6 +88,12 @@ object WidgetUpdater {
         val sig = signature(ctx, c)
         if (sig != lastSig) pushAll(ctx, c)
         else if (c.playState == PlayState.PLAYING && !appVisible) {
+            // EXPERIMENT (1.9.5): in Classic + oscilloscope the lightweight partial update froze the widget,
+            // so refresh completely instead to see whether the partial path is the culprit.
+            if (c.skin == com.retroplay.player.player.SkinId.CLASSIC && c.visMode == com.retroplay.player.player.VisMode.SCOPE) {
+                pushAll(ctx, c)
+                return
+            }
             val mgr = AppWidgetManager.getInstance(ctx)
             ids.forEach { id ->
                 try { mgr.partiallyUpdateAppWidget(id, build(ctx, c, id, full = false)) } catch (e: Throwable) { android.util.Log.w("RetroPlayWidget", "partial update failed", e) }
