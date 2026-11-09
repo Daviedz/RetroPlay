@@ -81,7 +81,6 @@ object WidgetUpdater {
     // -------------------------------------------------------------- update
 
     /** Called by the controller every 500 ms. */
-    private var diagCount = 0
 
     /** One-line state summary for the exported debug log. */
     fun diag(ctx: Context, c: PlayerController): String {
@@ -91,7 +90,6 @@ object WidgetUpdater {
     }
 
     fun onTick(ctx: Context, c: PlayerController) {
-        if (diagCount++ % 10 == 0) android.util.Log.i("RetroPlayWidget", "tick: " + diag(ctx, c))
         val ids = ids(ctx)
         if (ids.isEmpty()) return
         if (!ctx.getSystemService(PowerManager::class.java).isInteractive) return

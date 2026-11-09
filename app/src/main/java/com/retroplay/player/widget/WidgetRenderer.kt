@@ -111,15 +111,9 @@ object WidgetRenderer {
             // A visualizer glitch must never stop the clock / widget from updating
             try { drawVis(cv, c, s, area, d) } catch (e: Exception) { android.util.Log.w("RetroPlayWidget", "visualizer draw failed", e) }
         }
-        lcdLog++
-        if (lcdLog % 10 == 0) {
-            val px = IntArray(w * h); bmp.getPixels(px, 0, w, 0, 0, w, h)
-            android.util.Log.i("RetroPlayWidget", "lcd frame: text=$text skin=${c.skin} vis=${c.visMode} size=${w}x$h hash=${px.contentHashCode()}")
-        }
         return bmp
     }
 
-    private var lcdLog = 0
     private var lcdFrame = 0
 
     private fun drawStateGlyph(cv: Canvas, p: Paint, st: PlayState, r: RectF) {
