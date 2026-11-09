@@ -636,6 +636,7 @@ fun HBar(
     modifier: Modifier = Modifier,
     fill: Color? = null,
     centered: Boolean = false,
+    gradient: Boolean = false,
     onFinished: () -> Unit = {},
 ) {
     val s = LocalSkin.current
@@ -652,6 +653,10 @@ fun HBar(
             if (fill != null) {
                 if (centered && abs(v - 0.5f) < 0.002f) drawRect(fill, Offset(0f, gy + 1), Size(w, gh - 2))
                 else if (centered) drawRect(fill, Offset(min(w / 2, cx), gy + 1), Size(abs(cx - w / 2), gh - 2))
+                else if (gradient) drawRect(
+                    Brush.horizontalGradient(SEEK_GRADIENT, startX = 0f, endX = w),
+                    Offset(0f, gy + 1), Size(cx, gh - 2),
+                )
                 else drawRect(fill, Offset(0f, gy + 1), Size(cx, gh - 2))
             }
             bevelRect(Offset(x, 0f), Size(th, h), s.thumbTop, s.thumbBottom, Color.White, s.edgeDark)
@@ -669,6 +674,10 @@ fun HBar(
             if (fill != null) {
                 if (centered && abs(v - 0.5f) < 0.002f) drawRoundRect(fill, Offset(0f, gy), Size(w, gh), r)
                 else if (centered) drawRoundRect(fill, Offset(min(w / 2, cx), gy), Size(abs(cx - w / 2), gh), r)
+                else if (gradient) drawRoundRect(
+                    Brush.horizontalGradient(SEEK_GRADIENT, startX = 0f, endX = w),
+                    Offset(0f, gy), Size(cx, gh), r,
+                )
                 else drawRoundRect(fill, Offset(0f, gy), Size(cx, gh), r)
             }
             drawCircle(
@@ -719,6 +728,9 @@ fun VBar(value: Float, onChange: (Float) -> Unit, modifier: Modifier = Modifier)
 
 val SEEK_YELLOW = Color(0xFFFFF59D)
 
+/** Seek bar fill: green at the left, yellow in the middle, orange at the right. */
+val SEEK_GRADIENT = listOf(Color(0xFF00E030), Color(0xFFF0E000), Color(0xFFF08010))
+
 /** Track position bar; only seeks when the finger lifts, like the original. Idle for live radio. */
 @Composable
 fun SeekBar(c: PlayerController, modifier: Modifier = Modifier) {
@@ -732,6 +744,7 @@ fun SeekBar(c: PlayerController, modifier: Modifier = Modifier) {
         onChange = { if (!isRadio && c.durationMs > 0) drag = it },
         modifier = modifier,
         fill = SEEK_YELLOW,
+        gradient = true,
         onFinished = {
             drag?.let { c.seekTo(it) }
             drag = null

@@ -95,6 +95,14 @@ class PlayerController(private val app: Application) {
     // ---- media library / saved playlists / radio
     /** Which library tab is open; null = library closed. */
     var libraryTab by mutableStateOf<LibTab?>(null)
+
+    // ---- song search window + lyrics overlay
+    var showSearch by mutableStateOf(false)
+    var showLyrics by mutableStateOf(false); private set
+    var lyrics by mutableStateOf<LyricsResult?>(null); private set
+    var lyricsLoading by mutableStateOf(false); private set
+    var lyricsError by mutableStateOf<String?>(null); private set
+    private var lyricsFor: Uri? = null
     var library by mutableStateOf<List<Track>>(emptyList()); private set
     var libraryState by mutableStateOf(LibState.NOT_LOADED); private set
     var savedPlaylists by mutableStateOf<Map<String, List<Track>>>(emptyMap()); private set
@@ -217,6 +225,7 @@ class PlayerController(private val app: Application) {
     private fun loadCurrent() {
         val t = playlist.getOrNull(current) ?: return
         loadedIndex = current
+        onTrackChangedForLyrics()
         try {
             engine.load(t.uri)
         } catch (e: Exception) {
@@ -458,7 +467,7 @@ class PlayerController(private val app: Application) {
 
     private fun tick() {
         if (tickCount++ % 5 == 0) pollSystemVolume()
-        if (tickCount % 10 == 0) try { WidgetUpdater.onTick(app, this) } catch (_: Exception) {}
+        if (tickCount % 10 == 0) try { WidgetUpdater.onTick(app, this) } catch (e: Exception) { android.util.Log.w("RetroPlayWidget", "widget tick failed", e) }
         if (engine.prepared && playState != PlayState.STOPPED) positionMs = engine.position.toLong()
         val s = spectrum
         val p = peaks
@@ -726,6 +735,50 @@ class PlayerController(private val app: Application) {
             if (playState == PlayState.STOPPED) app.stopService(i)
             else ContextCompat.startForegroundService(app, i)
         } catch (_: Exception) {
+        }
+    }
+
+    /** Plays [t], adding it to the playlist first when it isn't there yet (used by search). */
+    fun playTrack(t: Track) {
+        var idx = playlist.indexOfFirst { it.uri == t.uri }
+        if (idx < 0) { playlist.add(t); idx = playlist.lastIndex; save() }
+        playIndex(idx)
+    }
+
+    fun openLyrics() {
+        val t = currentTrack
+        if (t == null) { toast("Play a song first"); return }
+        if (t.isStream) { toast("Lyrics aren't available for radio streams"); return }
+        showLyrics = true
+        loadLyricsIfNeeded()
+    }
+
+    fun closeLyrics() { showLyrics = false }
+
+    private fun loadLyricsIfNeeded() {
+        val t = currentTrack ?: return
+        if (t.uri == lyricsFor && (lyrics != null || lyricsLoading)) return
+        lyricsFor = t.uri
+        lyrics = null
+        lyricsError = null
+        lyricsLoading = true
+        mainScope.launch {
+            val r = withContext(Dispatchers.IO) {
+                runCatching { LyricsFetcher.fetch(t.title, t.artist, t.album, t.durationMs) }
+            }
+            if (lyricsFor != t.uri) return@launch // the song changed meanwhile
+            lyricsLoading = false
+            r.onSuccess {
+                lyrics = it
+                if (it == null) lyricsError = "No lyrics found for this song."
+            }.onFailure { lyricsError = "Couldn't reach the lyrics service. Check your internet connection." }
+        }
+    }
+
+    /** Called when the track changes: refresh the open lyrics overlay for the new song. */
+    private fun onTrackChangedForLyrics() {
+        if (showLyrics) {
+            if (currentTrack?.isStream == true) showLyrics = false else loadLyricsIfNeeded()
         }
     }
 

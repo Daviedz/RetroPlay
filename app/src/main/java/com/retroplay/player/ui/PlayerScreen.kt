@@ -61,6 +61,8 @@ fun PlayerScreen(c: PlayerController, actions: UiActions) {
                     }
                 }
                 LibraryDialog(c)
+                SearchDialog(c)
+                LyricsOverlay(c)
             }
             Updater.available?.let { u ->
                 val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application

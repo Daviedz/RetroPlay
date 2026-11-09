@@ -48,6 +48,7 @@ fun viewMenu(c: PlayerController, a: UiActions) = listOf(
     MenuItem("Equalizer", checked = c.showEq) { c.showEq = !c.showEq },
     MenuItem("Playlist", checked = c.showPl) { c.showPl = !c.showPl },
     MenuItem("Album art", checked = c.showArt) { c.showArt = !c.showArt },
+    MenuItem("Lyrics") { c.openLyrics() },
     MenuItem("Visualizer: ${if (c.hasVisPermission) c.visMode.label else "needs permission"}") {
         if (!c.hasVisPermission) a.requestVis() else c.cycleVisMode()
     },
@@ -80,6 +81,7 @@ fun selMenu(c: PlayerController) = listOf(
 )
 
 fun miscMenu(c: PlayerController) = listOf(
+    MenuItem("Search…") { c.showSearch = true },
     MenuItem("Sort by title") { c.sortByTitle() },
     MenuItem("Sort by artist") { c.sortByArtist() },
     MenuItem("Randomize list") { c.randomize() },

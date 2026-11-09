@@ -176,7 +176,7 @@ object WidgetUpdater {
             else -> 0f
         }
         val seekFill = 0xFFFFF59D.toInt()
-        rv.setImageViewBitmap(R.id.w_seek, WidgetRenderer.slider(s, pos, seekFill, false, g.seekW, g.seekH, g.d))
+        rv.setImageViewBitmap(R.id.w_seek, WidgetRenderer.slider(s, pos, seekFill, false, g.seekW, g.seekH, g.d, gradient = true))
         if (!full) return rv
 
         val volFill = if (s.isClassic) volumeColor(c.volume) else s.volumeFill.toArgb()

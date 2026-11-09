@@ -89,7 +89,10 @@ object WidgetRenderer {
         // Visualizer below
         val visTop = baseline + 4 * d
         val area = RectF(left, visTop, right, h - pad)
-        if (area.height() > 4 * d) drawVis(cv, c, s, area, d)
+        if (area.height() > 4 * d) {
+            // A visualizer glitch must never stop the clock / widget from updating
+            try { drawVis(cv, c, s, area, d) } catch (e: Exception) { android.util.Log.w("RetroPlayWidget", "visualizer draw failed", e) }
+        }
         return bmp
     }
 
@@ -188,8 +191,13 @@ object WidgetRenderer {
 
     // ------------------------------------------------------------- sliders
 
+    private fun seekShader(w: Float) = LinearGradient(
+        0f, 0f, w, 0f,
+        intArrayOf(0xFF00E030.toInt(), 0xFFF0E000.toInt(), 0xFFF08010.toInt()), null, Shader.TileMode.CLAMP,
+    )
+
     /** Horizontal slider, value 0..1, same look as HBar in the app. */
-    fun slider(s: Skin, value: Float, fill: Int?, centered: Boolean, wPx: Int, hPx: Int, d: Float): Bitmap {
+    fun slider(s: Skin, value: Float, fill: Int?, centered: Boolean, wPx: Int, hPx: Int, d: Float, gradient: Boolean = false): Bitmap {
         val w = wPx.coerceAtLeast(8).toFloat()
         val h = hPx.coerceAtLeast(4).toFloat()
         val bmp = Bitmap.createBitmap(w.toInt(), h.toInt(), Bitmap.Config.ARGB_8888)
@@ -209,7 +217,11 @@ object WidgetRenderer {
                 p.color = fill
                 if (centered && abs(value - 0.5f) < 0.002f) cv.drawRect(0f, gy + 1, w, gy + gh - 1, p)
                 else if (centered) cv.drawRect(min(w / 2, cx), gy + 1, min(w / 2, cx) + abs(cx - w / 2), gy + gh - 1, p)
-                else cv.drawRect(0f, gy + 1, cx, gy + gh - 1, p)
+                else {
+                    if (gradient) p.shader = seekShader(w)
+                    cv.drawRect(0f, gy + 1, cx, gy + gh - 1, p)
+                    p.shader = null
+                }
             }
             p.shader = LinearGradient(0f, 0f, 0f, h, s.thumbTop.toArgb(), s.thumbBottom.toArgb(), Shader.TileMode.CLAMP)
             cv.drawRect(x, 0f, x + th, h, p)
@@ -237,7 +249,9 @@ object WidgetRenderer {
                 val full = centered && abs(value - 0.5f) < 0.002f
                 val l = if (full) 0f else if (centered) min(w / 2, cx) else 0f
                 val rr = if (full) w else if (centered) l + abs(cx - w / 2) else cx
+                if (gradient) p.shader = seekShader(w)
                 cv.drawRoundRect(RectF(l, gy, rr, gy + gh), gh / 2, gh / 2, p)
+                p.shader = null
             }
             p.shader = LinearGradient(0f, h / 2 - rad, 0f, h / 2 + rad, s.thumbTop.toArgb(), s.thumbBottom.toArgb(), Shader.TileMode.CLAMP)
             cv.drawCircle(cx, h / 2, rad - d / 2, p)
