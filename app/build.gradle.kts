@@ -18,10 +18,22 @@ android {
 
     signingConfigs {
         create("localRelease") {
-            storeFile = file(System.getProperty("user.home") + "/.android/debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
+            // Release key lives outside the repo; its path/passwords come from ~/.gradle/gradle.properties
+            // (RETROPLAY_STORE_FILE, RETROPLAY_STORE_PASSWORD, RETROPLAY_KEY_ALIAS, RETROPLAY_KEY_PASSWORD)
+            // or the same names as environment variables (CI). Falls back to the debug key if unset.
+            fun prop(n: String): String? = (project.findProperty(n) as String?) ?: System.getenv(n)
+            val sf = prop("RETROPLAY_STORE_FILE")
+            if (sf != null) {
+                storeFile = file(sf)
+                storePassword = prop("RETROPLAY_STORE_PASSWORD")
+                keyAlias = prop("RETROPLAY_KEY_ALIAS")
+                keyPassword = prop("RETROPLAY_KEY_PASSWORD")
+            } else {
+                storeFile = file(System.getProperty("user.home") + "/.android/debug.keystore")
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
         }
     }
     buildTypes {

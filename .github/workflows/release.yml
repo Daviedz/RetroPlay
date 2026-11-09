@@ -1,0 +1,48 @@
+name: Release APK
+
+# Push a tag like v1.9 (must equal versionName in app/build.gradle.kts) to build a signed APK
+# and publish it as a GitHub Release. The app's "Check for updates" reads the latest release.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Check tag matches versionName
+        run: |
+          V=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          if [ "v$V" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match versionName $V"; exit 1
+          fi
+
+      - name: Restore release keystore
+        run: echo "${{ secrets.RETROPLAY_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/retroplay-release.jks"
+
+      - name: Build signed release APK
+        env:
+          RETROPLAY_STORE_FILE: ${{ runner.temp }}/retroplay-release.jks
+          RETROPLAY_STORE_PASSWORD: ${{ secrets.RETROPLAY_STORE_PASSWORD }}
+          RETROPLAY_KEY_ALIAS: ${{ secrets.RETROPLAY_KEY_ALIAS }}
+          RETROPLAY_KEY_PASSWORD: ${{ secrets.RETROPLAY_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk "RetroPlay-${GITHUB_REF_NAME}.apk"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: RetroPlay-${{ github.ref_name }}.apk
+          generate_release_notes: true

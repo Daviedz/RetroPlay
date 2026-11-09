@@ -729,6 +729,8 @@ class PlayerController(private val app: Application) {
         }
     }
 
+    fun checkForUpdate() = Updater.check(app, manual = true)
+
     private fun toast(msg: String) = Toast.makeText(app, msg, Toast.LENGTH_SHORT).show()
 
     fun save() {

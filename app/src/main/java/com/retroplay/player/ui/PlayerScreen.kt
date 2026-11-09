@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.retroplay.player.player.PlayerController
+import com.retroplay.player.player.Updater
 
 @Composable
 fun PlayerScreen(c: PlayerController, actions: UiActions) {
@@ -60,6 +61,22 @@ fun PlayerScreen(c: PlayerController, actions: UiActions) {
                     }
                 }
                 LibraryDialog(c)
+            }
+            Updater.available?.let { u ->
+                val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application
+                AlertDialog(
+                    onDismissRequest = { if (!Updater.busy) Updater.available = null },
+                    confirmButton = {
+                        TextButton(enabled = !Updater.busy, onClick = { Updater.install(app, u) }) {
+                            Text(if (Updater.busy) "Downloading ${Updater.progress.coerceAtLeast(0)}%" else "Update")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(enabled = !Updater.busy, onClick = { Updater.available = null }) { Text("Later") }
+                    },
+                    title = { Text("RetroPlay ${u.version} is available") },
+                    text = { Text(u.notes.ifBlank { "A new version is ready to install." }) },
+                )
             }
             if (showHelp) {
                 AlertDialog(

@@ -36,6 +36,7 @@ fun optionsMenu(c: PlayerController) = skinMenu(c) + listOf(
     MenuItem("Repeat", checked = c.repeatOn) { c.toggleRepeat() },
     MenuItem("Show time remaining", checked = c.showRemaining) { c.showRemaining = !c.showRemaining },
     MenuItem("Show player on lock screen", checked = c.showOnLock) { c.showOnLock = !c.showOnLock },
+    MenuItem("Check for updates…") { c.checkForUpdate() },
 ) + listOf("Small", "Medium").mapIndexed { i, name ->
     MenuItem("Widget display: $name", checked = c.widgetLcd == i) {
         c.widgetLcd = i

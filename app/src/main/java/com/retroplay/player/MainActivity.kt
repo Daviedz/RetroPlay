@@ -78,6 +78,7 @@ class MainActivity : ComponentActivity() {
             PlayerScreen(controller, actions)
         }
         handleOpen(intent)
+        com.retroplay.player.player.Updater.autoCheck(application) // at most once a day, silent
     }
 
     override fun onNewIntent(intent: Intent) {
