@@ -29,6 +29,13 @@ object WidgetRenderer {
 
     // ---------------------------------------------------------------- LCD
 
+    /** Clock text shown on the LCD (elapsed, or remaining when toggled). */
+    fun clockText(c: PlayerController): String {
+        val remaining = c.showRemaining && c.durationMs > 0
+        val ms = if (remaining) c.durationMs - c.positionMs else c.positionMs
+        return (if (remaining) "-" else "") + formatClock(ms)
+    }
+
     fun lcd(c: PlayerController, s: Skin, wPx: Int, hPx: Int, d: Float, artMode: Boolean): Bitmap {
         val w = wPx.coerceAtLeast(8)
         val h = hPx.coerceAtLeast(8)
@@ -93,7 +100,7 @@ object WidgetRenderer {
         p.color = s.lcdText.toArgb()
         drawStateGlyph(cv, p, c.playState, RectF(left, baseline - capH / 2 - glyph / 2, left + glyph, baseline - capH / 2 + glyph / 2))
         p.color = (if (stopped) s.lcdDim else s.lcdText).toArgb()
-        cv.drawText(text, left + glyph + gap, baseline, p)
+        // (the clock itself is a TextView in the widget layout; see WidgetUpdater)
 
         // Visualizer below
         val visTop = baseline + 4 * d

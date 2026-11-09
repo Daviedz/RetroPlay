@@ -178,6 +178,14 @@ object WidgetUpdater {
             // Set the display height explicitly too, rather than relying only on the bitmap size
             rv.setViewLayoutHeight(R.id.w_lcd, g.lcdDp.toFloat(), TypedValue.COMPLEX_UNIT_DIP)
         }
+        // Clock as plain text on top of the LCD picture (sized/placed like the picture's own clock)
+        val clock = WidgetRenderer.clockText(c)
+        val availDp = g.lcdW / g.d - 10f - 8f - 5f
+        val tsDp = min(g.lcdDp * 0.36f, availDp / (clock.length * 0.6f))
+        rv.setTextViewText(R.id.w_clock, clock)
+        rv.setTextViewTextSize(R.id.w_clock, TypedValue.COMPLEX_UNIT_DIP, tsDp)
+        rv.setTextColor(R.id.w_clock, (if (c.playState == PlayState.STOPPED) s.lcdDim else s.lcdText).toArgb())
+        rv.setViewPadding(R.id.w_clock, (18 * g.d).toInt(), (5 * g.d).toInt(), 0, 0)
         val radio = c.currentTrack?.isStream == true
         val pos = when {
             radio -> com.retroplay.player.player.RadioSweep.fraction(
