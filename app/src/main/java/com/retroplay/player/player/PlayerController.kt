@@ -785,6 +785,34 @@ class PlayerController(private val app: Application) {
 
     fun checkForUpdate() = Updater.check(app, manual = true)
 
+    /** Exports RetroPlay's own recent log (plus a state summary) and opens the share sheet. */
+    private val NL = System.lineSeparator()
+
+    fun shareDebugLog() {
+        mainScope.launch {
+            val f = withContext(Dispatchers.IO) {
+                runCatching {
+                    val dir = java.io.File(app.cacheDir, "logs").apply { mkdirs() }
+                    val out = java.io.File(dir, "retroplay-log.txt")
+                    val text = try {
+                        Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-v", "threadtime", "-t", "3000"))
+                            .inputStream.bufferedReader().readText()
+                    } catch (e: Throwable) { "logcat failed: $e" }
+                    val ver = app.packageManager.getPackageInfo(app.packageName, 0).versionName
+                    out.writeText("RetroPlay $ver" + NL + WidgetUpdater.diag(app, this@PlayerController) + NL + NL + text)
+                    out
+                }
+            }
+            f.onSuccess {
+                val uri = androidx.core.content.FileProvider.getUriForFile(app, "${app.packageName}.updates", it)
+                val send = Intent(Intent.ACTION_SEND).setType("text/plain")
+                    .putExtra(Intent.EXTRA_STREAM, uri)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                app.startActivity(Intent.createChooser(send, "Share RetroPlay log").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            }.onFailure { toast("Couldn't create the log") }
+        }
+    }
+
     private fun toast(msg: String) = Toast.makeText(app, msg, Toast.LENGTH_SHORT).show()
 
     fun save() {

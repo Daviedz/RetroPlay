@@ -81,19 +81,23 @@ object WidgetUpdater {
     // -------------------------------------------------------------- update
 
     /** Called by the controller every 500 ms. */
+    private var diagCount = 0
+
+    /** One-line state summary for the exported debug log. */
+    fun diag(ctx: Context, c: PlayerController): String {
+        val interactive = try { ctx.getSystemService(PowerManager::class.java).isInteractive } catch (_: Throwable) { null }
+        return "widgetIds=${ids(ctx).size} interactive=$interactive appVisible=$appVisible skin=${c.skin} vis=${c.visMode} " +
+            "state=${c.playState} pos=${c.positionMs} sigChanged=${signature(ctx, c) != lastSig}"
+    }
+
     fun onTick(ctx: Context, c: PlayerController) {
+        if (diagCount++ % 10 == 0) android.util.Log.i("RetroPlayWidget", "tick: " + diag(ctx, c))
         val ids = ids(ctx)
         if (ids.isEmpty()) return
         if (!ctx.getSystemService(PowerManager::class.java).isInteractive) return
         val sig = signature(ctx, c)
         if (sig != lastSig) pushAll(ctx, c)
         else if (c.playState == PlayState.PLAYING && !appVisible) {
-            // EXPERIMENT (1.9.5): in Classic + oscilloscope the lightweight partial update froze the widget,
-            // so refresh completely instead to see whether the partial path is the culprit.
-            if (c.skin == com.retroplay.player.player.SkinId.CLASSIC && c.visMode == com.retroplay.player.player.VisMode.SCOPE) {
-                pushAll(ctx, c)
-                return
-            }
             val mgr = AppWidgetManager.getInstance(ctx)
             ids.forEach { id ->
                 try { mgr.partiallyUpdateAppWidget(id, build(ctx, c, id, full = false)) } catch (e: Throwable) { android.util.Log.w("RetroPlayWidget", "partial update failed", e) }
