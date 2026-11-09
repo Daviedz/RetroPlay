@@ -93,8 +93,15 @@ object WidgetRenderer {
             // A visualizer glitch must never stop the clock / widget from updating
             try { drawVis(cv, c, s, area, d) } catch (e: Exception) { android.util.Log.w("RetroPlayWidget", "visualizer draw failed", e) }
         }
+        lcdLog++
+        if (lcdLog % 10 == 0) {
+            val px = IntArray(w * h); bmp.getPixels(px, 0, w, 0, 0, w, h)
+            android.util.Log.i("RetroPlayWidget", "lcd frame: text=$text skin=${c.skin} vis=${c.visMode} size=${w}x$h hash=${px.contentHashCode()}")
+        }
         return bmp
     }
+
+    private var lcdLog = 0
 
     private fun drawStateGlyph(cv: Canvas, p: Paint, st: PlayState, r: RectF) {
         when (st) {
@@ -168,21 +175,24 @@ object WidgetRenderer {
                 }
             }
             VisMode.SCOPE -> {
+                // Drawn as thin vertical bars (like the spectrum) rather than a stroked path
                 val wf = c.waveform
-                p.style = Paint.Style.STROKE
-                p.strokeWidth = 1.5f * d
                 if (wf.size > 1) {
+                    p.style = Paint.Style.FILL
                     p.color = s.lcdText.toArgb()
-                    val path = Path()
-                    wf.forEachIndexed { i, v ->
-                        val x = r.left + i * r.width() / (wf.size - 1)
-                        val y = r.centerY() - v * r.height() / 2
-                        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                    val cols = (r.width() / (2f * d)).toInt().coerceIn(8, 96)
+                    val bw = r.width() / cols
+                    val mid = r.centerY()
+                    for (i in 0 until cols) {
+                        val v = wf[i * (wf.size - 1) / (cols - 1).coerceAtLeast(1)]
+                        val half = (kotlin.math.abs(v) * r.height() / 2).coerceAtLeast(d * 0.75f)
+                        val x = r.left + i * bw
+                        cv.drawRect(x, mid - half, x + (bw * 0.7f).coerceAtLeast(1f), mid + half, p)
                     }
-                    cv.drawPath(path, p)
                 } else {
                     p.color = s.lcdDim.toArgb()
-                    cv.drawLine(r.left, r.centerY(), r.right, r.centerY(), p)
+                    p.style = Paint.Style.FILL
+                    cv.drawRect(r.left, r.centerY() - d / 2, r.right, r.centerY() + d / 2, p)
                 }
             }
             VisMode.OFF -> Unit

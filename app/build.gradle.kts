@@ -12,8 +12,8 @@ android {
         applicationId = "com.retroplay.player"
         minSdk = 26
         targetSdk = 35
-        versionCode = 15
-        versionName = "1.9.6"
+        versionCode = 16
+        versionName = "1.9.7"
     }
 
     signingConfigs {
