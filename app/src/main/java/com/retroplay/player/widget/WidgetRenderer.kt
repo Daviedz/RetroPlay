@@ -38,6 +38,15 @@ object WidgetRenderer {
         bmp.density = (DisplayMetrics.DENSITY_DEFAULT * d).toInt()
         val cv = Canvas(bmp)
         val p = Paint(Paint.ANTI_ALIAS_FLAG)
+        if (s.isClassic) {
+            // Fully opaque picture (same layers as widget_lcd_classic): some launchers stop refreshing
+            // a mostly see-through image when it has little on it (oscilloscope / visualizer off).
+            val e = d.coerceAtLeast(1f)
+            p.style = Paint.Style.FILL
+            p.color = 0xFF6E6E96.toInt(); cv.drawRect(0f, 0f, w.toFloat(), h.toFloat(), p)
+            p.color = 0xFF0A0A12.toInt(); cv.drawRect(0f, 0f, w - e, h - e, p)
+            p.color = 0xFF000000.toInt(); cv.drawRect(e, e, w - e, h - e, p)
+        }
         val pad = 5 * d
         var left = pad
         val right = w - pad
