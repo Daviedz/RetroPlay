@@ -42,7 +42,10 @@ fun SearchDialog(c: PlayerController) {
     // Search the whole device library plus anything already in the playlist
     LaunchedEffect(Unit) { if (c.libraryState == LibState.NOT_LOADED) a.requestLibrary() }
     val pool = remember(c.library, c.playlist.size) {
-        (c.playlist.filter { !it.isStream } + c.library).distinctBy { it.uri }
+        // The same song can be in both lists under different addresses, so de-duplicate by what it is too
+        (c.playlist.filter { !it.isStream } + c.library)
+            .distinctBy { it.uri }
+            .distinctBy { Triple(it.title.trim().lowercase(), it.artist.trim().lowercase(), it.durationMs / 1000) }
     }
     val q = query.trim().lowercase()
     val results = remember(q, by, pool) {

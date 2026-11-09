@@ -47,6 +47,7 @@ fun ArtWindow(c: PlayerController) {
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     SkinTextButton("BROWSE ALBUMS", { c.libraryTab = LibTab.ALBUMS }, Modifier.height(26.dp))
                     SkinTextButton("RADIO", { c.libraryTab = LibTab.RADIO }, Modifier.height(26.dp))
+                    SkinTextButton("LYRICS", { c.openLyrics() }, Modifier.height(26.dp))
                 }
             }
         }
