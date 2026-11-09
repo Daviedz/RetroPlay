@@ -52,7 +52,9 @@ object WidgetRenderer {
             p.style = Paint.Style.FILL
             p.color = 0xFF6E6E96.toInt(); cv.drawRect(0f, 0f, w.toFloat(), h.toFloat(), p)
             p.color = 0xFF0A0A12.toInt(); cv.drawRect(0f, 0f, w - e, h - e, p)
-            p.color = 0xFF000000.toInt(); cv.drawRect(e, e, w - e, h - e, p)
+            // Nudge the background by 0..3 (of 255) every frame so no two frames share pixels; invisible to the eye
+            val n = (lcdFrame++ and 3)
+            p.color = (0xFF000000.toInt() or (n shl 16) or (n shl 8) or n); cv.drawRect(e, e, w - e, h - e, p)
         }
         val pad = 5 * d
         var left = pad
@@ -118,6 +120,7 @@ object WidgetRenderer {
     }
 
     private var lcdLog = 0
+    private var lcdFrame = 0
 
     private fun drawStateGlyph(cv: Canvas, p: Paint, st: PlayState, r: RectF) {
         when (st) {
