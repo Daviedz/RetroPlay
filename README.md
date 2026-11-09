@@ -1,7 +1,5 @@
 # RetroPlay
 
-<p align="center"><img src="screenshots/retroplay-main.jpg" alt="RetroPlay main window, album art, equalizer and playlist" width="360"></p>
-
 An Android music player with a classic late-90s desktop-player layout, written in Kotlin and Jetpack Compose. It has two switchable skins:
 
 - **Classic Pixel**: a dark slate face, a black/green LCD, bevelled square buttons and a red-yellow-green spectrum analyser.
