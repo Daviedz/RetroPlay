@@ -15,5 +15,6 @@ class RetroPlayApp : Application() {
             NotificationChannel(PlaybackService.CHANNEL, "Playback", NotificationManager.IMPORTANCE_LOW)
         )
         controller = PlayerController(this)
+        UpdateNotifier.schedule(this)                    // background update check -> notification
     }
 }

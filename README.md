@@ -38,6 +38,7 @@ Both skins are original artwork drawn in code. They borrow the style of the era 
   - EQ turns the equalizer on or off. ART swaps the spectrum for the album cover. PL and ML open the app. Eject opens the file picker.
   - The widget redraws twice a second only while music plays, the screen is on and the app itself isn't open.
 - **Layout**: the playlist window stretches to fill the remaining screen height, so its buttons stay visible.
+- **Update notification**: about twice a day, even with the app closed, RetroPlay checks GitHub for a new release and posts a notification (once per release). Tap it to open the app and install. Needs the notification permission.
 - **Saved settings**: the playlist, skin, EQ, volume and the other settings are kept between launches.
 
 ## Build

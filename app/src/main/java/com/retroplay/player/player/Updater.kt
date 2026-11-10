@@ -40,14 +40,14 @@ object Updater {
 
     private val scope = CoroutineScope(Dispatchers.Main)
 
-    private fun installedVersion(app: Application): String =
+    internal fun installedVersion(app: Application): String =
         app.packageManager.getPackageInfo(app.packageName, 0).versionName ?: "0"
 
     /** "v1.10" / "1.10.2" -> [1, 10, 2]; anything non-numeric is ignored. */
     private fun parts(v: String) = v.trim().removePrefix("v").removePrefix("V")
         .split('.', '-', '_').mapNotNull { it.toIntOrNull() }
 
-    private fun isNewer(remote: String, local: String): Boolean {
+    internal fun isNewer(remote: String, local: String): Boolean {
         val r = parts(remote); val l = parts(local)
         for (i in 0 until maxOf(r.size, l.size)) {
             val a = r.getOrElse(i) { 0 }; val b = l.getOrElse(i) { 0 }
@@ -83,7 +83,7 @@ object Updater {
         }
     }
 
-    private fun fetchLatest(): UpdateInfo? {
+    internal fun fetchLatest(): UpdateInfo? {
         val json = JSONObject(httpGet(LATEST))
         val tag = json.optString("tag_name")
         val assets = json.optJSONArray("assets") ?: return null
