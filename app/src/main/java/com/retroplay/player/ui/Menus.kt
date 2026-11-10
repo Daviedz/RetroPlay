@@ -79,6 +79,7 @@ fun selMenu(c: PlayerController) = listOf(
     MenuItem("Select all") { c.selectAll() },
     MenuItem("Select none") { c.selectNone() },
     MenuItem("Invert selection") { c.invertSelection() },
+    MenuItem("Add selected to playlist…") { c.beginAddSelectedToPlaylist() },
 )
 
 fun miscMenu(c: PlayerController) = listOf(
@@ -98,7 +99,7 @@ fun listOptsMenu(c: PlayerController) = listOf(
 const val HELP_TEXT = """• Tap a playlist row to select it, double-tap to play it.
 • The lit (green) transport button shows what the player is doing: Play, Pause or Stop.
 • ML opens the Media Library: browse Albums by cover art, Folders, your saved playlists (LISTS) and Internet RADIO.
-• To make your own playlist: build it in the playlist window, then OPTS → Save / load playlists and give it a name.
+• To make your own playlist: long-press a song in the playlist window (or select several first), then type a new name or pick an existing playlist to add it to. You can also build the list and use OPTS → Save / load playlists.
 • Play a folder: Library → Folders, or "Play a folder…" for SD cards and USB drives.
 • Radio stations are added to the playlist marked LIVE. Star a station to keep it in Favorites, or add any stream URL.
 • Tap the clock to switch elapsed / remaining time. Tap the visualizer to change its mode (Android asks for the audio permission for this; nothing is recorded).

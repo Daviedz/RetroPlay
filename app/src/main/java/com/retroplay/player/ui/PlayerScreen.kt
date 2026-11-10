@@ -62,6 +62,7 @@ fun PlayerScreen(c: PlayerController, actions: UiActions) {
                 }
                 LibraryDialog(c)
                 SearchDialog(c)
+                AddToPlaylistDialog(c)
                 LyricsOverlay(c)
             }
             Updater.available?.let { u ->

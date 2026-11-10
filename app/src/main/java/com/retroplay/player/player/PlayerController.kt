@@ -98,6 +98,7 @@ class PlayerController(private val app: Application) {
 
     // ---- song search window + lyrics overlay
     var showSearch by mutableStateOf(false)
+    var addToListTracks by mutableStateOf<List<Track>?>(null)   // songs waiting for a playlist name
     var showLyrics by mutableStateOf(false); private set
     var lyrics by mutableStateOf<LyricsResult?>(null); private set
     var lyricsLoading by mutableStateOf(false); private set
@@ -555,6 +556,31 @@ class PlayerController(private val app: Application) {
         savedPlaylists = savedPlaylists + (n to playlist.toList())
         save()
         toast("Saved \"$n\" (${playlist.size} tracks)")
+        return true
+    }
+
+    /** Long-press: take the pressed row (or the whole selection) and ask which playlist it goes to. */
+    fun beginAddToPlaylist(index: Int) {
+        if (index !in playlist.indices) return
+        if (index !in selection) selection = setOf(index)
+        addToListTracks = selection.sorted().mapNotNull { playlist.getOrNull(it) }
+    }
+
+    fun beginAddSelectedToPlaylist() {
+        if (selection.isEmpty()) return toast("Tap tracks to select them first")
+        addToListTracks = selection.sorted().mapNotNull { playlist.getOrNull(it) }
+    }
+
+    /** Creates the playlist if the name is new, otherwise appends (skipping songs it already has). */
+    fun addTracksToSaved(name: String, tracks: List<Track>): Boolean {
+        val n = name.trim()
+        if (n.isEmpty()) { toast("Type a name first"); return false }
+        val old = savedPlaylists[n]
+        val merged = if (old == null) tracks else old + tracks.filter { t -> old.none { it.uri == t.uri } }
+        savedPlaylists = savedPlaylists + (n to merged)
+        save()
+        val added = merged.size - (old?.size ?: 0)
+        toast(if (old == null) "Created \"$n\" with ${tracks.size} song(s)" else "Added $added song(s) to \"$n\"")
         return true
     }
 

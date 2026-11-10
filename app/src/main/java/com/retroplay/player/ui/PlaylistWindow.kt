@@ -72,6 +72,7 @@ fun PlaylistWindow(c: PlayerController, modifier: Modifier = Modifier) {
                         index = i, track = t,
                         isCurrent = i == c.current, isSelected = i in c.selection,
                         onTap = { c.toggleSelect(i) }, onDoubleTap = { c.playIndex(i) },
+                        onLongPress = { c.beginAddToPlaylist(i) },
                     )
                 }
             }
@@ -142,11 +143,19 @@ private fun PlaylistRow(
     isSelected: Boolean,
     onTap: () -> Unit,
     onDoubleTap: () -> Unit,
+    onLongPress: () -> Unit,
 ) {
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     TrackRow(
         index, track, isCurrent, isSelected,
         Modifier.pointerInput(index, track.uri) {
-            detectTapGestures(onTap = { onTap() }, onDoubleTap = { onDoubleTap() })
+            detectTapGestures(
+                onTap = { onTap() }, onDoubleTap = { onDoubleTap() },
+                onLongPress = {
+                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    onLongPress()
+                },
+            )
         },
     )
 }

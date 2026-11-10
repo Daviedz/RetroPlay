@@ -17,6 +17,8 @@ Both skins are original artwork drawn in code. They borrow the style of the era 
   - MISC sorts, randomizes or reverses.
   - OPTS switches skins.
   
+  - Long-press a song (or select several, then long-press one) to create a new saved playlist from them or add them to an existing one. SEL → "Add selected to playlist…" does the same.
+
   It also shows the elapsed time over the playlist's total time.
 - **Active indicators**: the transport button for the current state (Play / Pause / Stop) lights up green.
 - **Album art window**: shows the current track's cover. Tap the cover to browse other albums by their art.
