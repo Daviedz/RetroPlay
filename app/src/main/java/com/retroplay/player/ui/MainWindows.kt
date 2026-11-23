@@ -102,7 +102,8 @@ fun ClassicMainWindow(c: PlayerController) {
             FaceLabel("BAL", Modifier.width(26.dp))
             HBar(
                 (c.balance + 1f) / 2f, { c.setBalanceLevel(it * 2f - 1f) }, Modifier.weight(0.38f).fillMaxHeight(),
-                fill = if (c.balance == 0f) Color(0xFF33C24A) else Color(0xFFE53935), centered = true,
+                fill = if (LocalSkin.current.monoBars) LocalSkin.current.volumeFill
+                else if (c.balance == 0f) Color(0xFF33C24A) else Color(0xFFE53935), centered = true,
             )
         }
         Spacer(Modifier.height(10.dp))

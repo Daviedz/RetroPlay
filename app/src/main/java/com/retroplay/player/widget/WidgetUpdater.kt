@@ -191,15 +191,15 @@ object WidgetUpdater {
             c.durationMs > 0 -> c.positionMs.toFloat() / c.durationMs
             else -> 0f
         }
-        val seekFill = 0xFFFFF59D.toInt()
-        rv.setImageViewBitmap(R.id.w_seek, WidgetRenderer.slider(s, pos, seekFill, false, g.seekW, g.seekH, g.d, gradient = true))
+        val seekFill = if (s.monoBars) s.volumeFill.toArgb() else 0xFFFFF59D.toInt()
+        rv.setImageViewBitmap(R.id.w_seek, WidgetRenderer.slider(s, pos, seekFill, false, g.seekW, g.seekH, g.d, gradient = !s.monoBars))
         if (!full) return rv
 
         val volFill = if (s.rainbowVolume) volumeColor(c.volume) else s.volumeFill.toArgb()
         rv.setImageViewBitmap(R.id.w_vol, WidgetRenderer.slider(s, c.volume, volFill, false, g.volW, g.barH, g.d))
         rv.setImageViewBitmap(
             R.id.w_bal,
-            WidgetRenderer.slider(s, (c.balance + 1f) / 2f, (if (c.balance == 0f) 0xFF33C24A.toInt() else 0xFFE53935.toInt()), true, g.balW, g.barH, g.d),
+            WidgetRenderer.slider(s, (c.balance + 1f) / 2f, (if (s.monoBars) s.volumeFill.toArgb() else if (c.balance == 0f) 0xFF33C24A.toInt() else 0xFFE53935.toInt()), true, g.balW, g.barH, g.d),
         )
 
         // ---- skin

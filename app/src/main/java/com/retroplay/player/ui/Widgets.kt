@@ -743,8 +743,8 @@ fun SeekBar(c: PlayerController, modifier: Modifier = Modifier) {
         value = if (isRadio) RadioSweep.fraction(c.currentTrack, running) else drag ?: pos,
         onChange = { if (!isRadio && c.durationMs > 0) drag = it },
         modifier = modifier,
-        fill = SEEK_YELLOW,
-        gradient = true,
+        fill = if (s.monoBars) s.volumeFill else SEEK_YELLOW,
+        gradient = !s.monoBars,
         onFinished = {
             drag?.let { c.seekTo(it) }
             drag = null

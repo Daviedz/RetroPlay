@@ -42,6 +42,8 @@ data class Skin(
     val isClassic: Boolean get() = id != SkinId.MODERN
     /** Classic Pixel only: the green-orange-red volume bar. Other skins use [volumeFill]. */
     val rainbowVolume: Boolean get() = id == SkinId.CLASSIC
+    /** Graphite: seek and balance bars use the volume bar's single colour instead of the green-yellow-orange seek and green/red balance. */
+    val monoBars: Boolean get() = id == SkinId.GRAPHITE
     val faceBrush: Brush get() = Brush.verticalGradient(listOf(faceTop, faceBottom))
     val lcdBrush: Brush get() = Brush.verticalGradient(listOf(lcdTop, lcdBottom))
 }
@@ -119,7 +121,7 @@ val GraphiteSkin = Skin(
     thumbTop = Color(0xFFEDEEF0), thumbBottom = Color(0xFF9EA1A6),
     eqCurve = Color(0xFFFF9A1F), eqCurveBg = Color(0xFF0D0E10),
     visBars = listOf(Color(0xFFF4F7FA), Color(0xFFAEBBCA), Color(0xFF5B6A7C)),
-    visPeak = Color(0xFFFF9A1F),
+    visPeak = Color(0xFFB9BCC1),
     listBg = Color(0xFF0D0E10), listText = Color(0xFFD2D5DA),
     listCurrent = Color(0xFFFFFFFF), listSelBg = Color(0xFF3B4A5C),
     menuBg = Color(0xFF2E2F33), menuText = Color(0xFFE9E9EA),

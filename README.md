@@ -4,7 +4,7 @@ An Android music player with a classic late-90s desktop-player layout, written i
 
 - **Classic Pixel**: a dark slate face, a black/green LCD, bevelled square buttons and a red-yellow-green spectrum analyser.
 - **Chrome 2K**: brushed silver, a blue LCD, round transport buttons and a menu bar.
-- **Graphite**: a mid-2000s dark modular look: gunmetal-grey bevelled windows, a near-black LCD with cool white text, silver buttons and sliders, and an orange accent.
+- **Graphite**: a mid-2000s dark modular look: gunmetal-grey bevelled windows, a near-black LCD with cool white text, silver buttons and sliders (volume, balance and seek bars all silver, silver spectrum peaks), and an orange accent.
 
 All skins are original artwork drawn in code. They borrow the style of the era but contain no copied skin graphics or logos.
 
