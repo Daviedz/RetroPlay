@@ -1,11 +1,12 @@
 # RetroPlay
 
-An Android music player with a classic late-90s desktop-player layout, written in Kotlin and Jetpack Compose. It has two switchable skins:
+An Android music player with a classic late-90s desktop-player layout, written in Kotlin and Jetpack Compose. It has three switchable skins:
 
 - **Classic Pixel**: a dark slate face, a black/green LCD, bevelled square buttons and a red-yellow-green spectrum analyser.
 - **Chrome 2K**: brushed silver, a blue LCD, round transport buttons and a menu bar.
+- **Graphite**: a mid-2000s dark modular look: gunmetal-grey bevelled windows, a near-black LCD with cool white text, silver buttons and sliders, and an orange accent.
 
-Both skins are original artwork drawn in code. They borrow the style of the era but contain no copied skin graphics or logos.
+All skins are original artwork drawn in code. They borrow the style of the era but contain no copied skin graphics or logos.
 
 ## Features
 - **Main window**: time display (tap it to switch between elapsed and remaining; it blinks while paused), a scrolling title, kbps / kHz / mono-stereo readouts, a spectrum or oscilloscope visualizer (tap it to change mode), volume, balance, seek bar, Prev / Play / Pause / Stop / Next / Eject, Shuffle and Repeat.
@@ -56,7 +57,7 @@ Both skins are original artwork drawn in code. They borrow the style of the era 
 - `player/AudioEngine.kt` wraps MediaPlayer together with the Equalizer and Visualizer effects, all on one fixed audio session.
 - `player/PlayerController.kt` holds all player state and Winamp-style transport logic, plus the playlist and persistence code.
 - `PlaybackService.kt` is the foreground service and its notification.
-- `ui/Skin.kt` has both skins' colours and fonts. Add a third skin here.
+- `ui/Skin.kt` has the skins' colours and fonts. Add another skin here (square bevelled skins reuse the Classic layout via `isClassic`; the home-screen widget's drawables are `res/drawable/widget_*_<skin>.xml`).
 - `ui/Widgets.kt` holds the bevels, buttons, sliders, LCD, marquee, visualizer and menus.
 - `ui/MainWindows.kt` lays out the main window for each skin.
 - `ui/EqWindow.kt` and `ui/PlaylistWindow.kt` are the equalizer and playlist windows.

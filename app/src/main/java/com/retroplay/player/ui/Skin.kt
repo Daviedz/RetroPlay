@@ -38,7 +38,10 @@ data class Skin(
     val corner: Dp,
     val lcdFont: FontFamily, val uiFont: FontFamily, val listFont: FontFamily,
 ) {
-    val isClassic: Boolean get() = id == SkinId.CLASSIC
+    /** Square, bevelled window family (Classic Pixel and Graphite share its layout and drawing code). */
+    val isClassic: Boolean get() = id != SkinId.MODERN
+    /** Classic Pixel only: the green-orange-red volume bar. Other skins use [volumeFill]. */
+    val rainbowVolume: Boolean get() = id == SkinId.CLASSIC
     val faceBrush: Brush get() = Brush.verticalGradient(listOf(faceTop, faceBottom))
     val lcdBrush: Brush get() = Brush.verticalGradient(listOf(lcdTop, lcdBottom))
 }
@@ -95,9 +98,40 @@ val ModernSkin = Skin(
     lcdFont = FontFamily.Monospace, uiFont = FontFamily.SansSerif, listFont = FontFamily.SansSerif,
 )
 
+/**
+ * Graphite: a mid-2000s "modular" dark player look: gunmetal-grey bevelled windows, a near-black LCD with cool
+ * white text, silver buttons and sliders, and a single orange accent. Original colours drawn in code, no copied artwork.
+ */
+val GraphiteSkin = Skin(
+    id = SkinId.GRAPHITE,
+    desktop = Color(0xFF1B1B1D),
+    faceTop = Color(0xFF3E3F42), faceBottom = Color(0xFF2A2B2E),
+    edgeLight = Color(0xFF6C6E72), edgeDark = Color(0xFF0E0E10),
+    titleTop = Color(0xFF5C5E62), titleBottom = Color(0xFF393A3E),
+    titleText = Color(0xFFF2F2F2), titleStripe = Color(0xFF6E7074),
+    lcdTop = Color(0xFF0E0F11), lcdBottom = Color(0xFF060607),
+    lcdText = Color(0xFFDCE6F0), lcdDim = Color(0xFF2C3540), lcdLabel = Color(0xFFA9B3BE),
+    btnTop = Color(0xFFA4A6AA), btnBottom = Color(0xFF5E6064), btnText = Color(0xFF15161A),
+    btnPressedTop = Color(0xFF4C4E52), btnPressedBottom = Color(0xFF7C7E82),
+    ledOn = Color(0xFFFF9A1F), ledOff = Color(0xFF3A3026), activeGlyph = Color(0xFFFF8A00),
+    volumeFill = Color(0xFFB9BCC1), balanceFill = Color(0xFFB9BCC1), seekFill = Color(0xFF8C9096),
+    groove = Color(0xFF131416),
+    thumbTop = Color(0xFFEDEEF0), thumbBottom = Color(0xFF9EA1A6),
+    eqCurve = Color(0xFFFF9A1F), eqCurveBg = Color(0xFF0D0E10),
+    visBars = listOf(Color(0xFFF4F7FA), Color(0xFFAEBBCA), Color(0xFF5B6A7C)),
+    visPeak = Color(0xFFFF9A1F),
+    listBg = Color(0xFF0D0E10), listText = Color(0xFFD2D5DA),
+    listCurrent = Color(0xFFFFFFFF), listSelBg = Color(0xFF3B4A5C),
+    menuBg = Color(0xFF2E2F33), menuText = Color(0xFFE9E9EA),
+    labelText = Color(0xFFB9BCC1),
+    corner = 0.dp,
+    lcdFont = FontFamily.Monospace, uiFont = FontFamily.SansSerif, listFont = FontFamily.SansSerif,
+)
+
 fun skinFor(id: SkinId): Skin = when (id) {
     SkinId.CLASSIC -> ClassicSkin
     SkinId.MODERN -> ModernSkin
+    SkinId.GRAPHITE -> GraphiteSkin
 }
 
 val LocalSkin = staticCompositionLocalOf { ClassicSkin }

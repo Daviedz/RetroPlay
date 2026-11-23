@@ -96,7 +96,7 @@ fun ClassicMainWindow(c: PlayerController) {
             FaceLabel("VOL", Modifier.width(26.dp))
             HBar(
                 c.volume, { c.setVolumeLevel(it) }, Modifier.weight(0.62f).fillMaxHeight(),
-                fill = volumeColor(c.volume), onFinished = { c.endVolumeDrag() },
+                fill = if (LocalSkin.current.rainbowVolume) volumeColor(c.volume) else LocalSkin.current.volumeFill, onFinished = { c.endVolumeDrag() },
             )
             Spacer(Modifier.width(10.dp))
             FaceLabel("BAL", Modifier.width(26.dp))

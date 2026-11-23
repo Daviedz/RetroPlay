@@ -195,7 +195,7 @@ object WidgetUpdater {
         rv.setImageViewBitmap(R.id.w_seek, WidgetRenderer.slider(s, pos, seekFill, false, g.seekW, g.seekH, g.d, gradient = true))
         if (!full) return rv
 
-        val volFill = if (s.isClassic) volumeColor(c.volume) else s.volumeFill.toArgb()
+        val volFill = if (s.rainbowVolume) volumeColor(c.volume) else s.volumeFill.toArgb()
         rv.setImageViewBitmap(R.id.w_vol, WidgetRenderer.slider(s, c.volume, volFill, false, g.volW, g.barH, g.d))
         rv.setImageViewBitmap(
             R.id.w_bal,
@@ -204,11 +204,14 @@ object WidgetUpdater {
 
         // ---- skin
         val classic = s.isClassic
-        val btnBg = if (classic) R.drawable.widget_btn_classic else R.drawable.widget_btn_modern
-        val lcdBg = if (classic) R.drawable.widget_lcd_classic else R.drawable.widget_lcd_modern
-        rv.setInt(R.id.w_root, "setBackgroundResource", if (classic) R.drawable.widget_face_classic else R.drawable.widget_face_modern)
-        rv.setInt(R.id.w_title, "setBackgroundResource", if (classic) R.drawable.widget_title_classic else R.drawable.widget_title_modern)
-        val stripes = if (classic) R.drawable.widget_stripes_classic else R.drawable.widget_stripes_modern
+        val graphite = s.id == com.retroplay.player.player.SkinId.GRAPHITE
+        val btnBg = if (graphite) R.drawable.widget_btn_graphite else if (classic) R.drawable.widget_btn_classic else R.drawable.widget_btn_modern
+        val lcdBg = if (graphite) R.drawable.widget_lcd_graphite else if (classic) R.drawable.widget_lcd_classic else R.drawable.widget_lcd_modern
+        rv.setInt(R.id.w_root, "setBackgroundResource",
+            if (graphite) R.drawable.widget_face_graphite else if (classic) R.drawable.widget_face_classic else R.drawable.widget_face_modern)
+        rv.setInt(R.id.w_title, "setBackgroundResource",
+            if (graphite) R.drawable.widget_title_graphite else if (classic) R.drawable.widget_title_classic else R.drawable.widget_title_modern)
+        val stripes = if (graphite) R.drawable.widget_stripes_graphite else if (classic) R.drawable.widget_stripes_classic else R.drawable.widget_stripes_modern
         rv.setInt(R.id.w_stripe1, "setBackgroundResource", stripes)
         rv.setInt(R.id.w_stripe2, "setBackgroundResource", stripes)
         intArrayOf(R.id.w_lcd, R.id.w_marquee_box, R.id.w_kbps, R.id.w_khz).forEach {

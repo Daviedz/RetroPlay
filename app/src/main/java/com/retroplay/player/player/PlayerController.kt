@@ -41,7 +41,7 @@ import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
-enum class SkinId(val label: String) { CLASSIC("Classic Pixel"), MODERN("Chrome 2K") }
+enum class SkinId(val label: String) { CLASSIC("Classic Pixel"), MODERN("Chrome 2K"), GRAPHITE("Graphite") }
 
 /**
  * All player state lives here (Compose snapshot state), owned by the Application so the

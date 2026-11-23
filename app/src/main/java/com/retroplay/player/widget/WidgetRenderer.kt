@@ -50,8 +50,8 @@ object WidgetRenderer {
             // a mostly see-through image when it has little on it (oscilloscope / visualizer off).
             val e = d.coerceAtLeast(1f)
             p.style = Paint.Style.FILL
-            p.color = 0xFF6E6E96.toInt(); cv.drawRect(0f, 0f, w.toFloat(), h.toFloat(), p)
-            p.color = 0xFF0A0A12.toInt(); cv.drawRect(0f, 0f, w - e, h - e, p)
+            p.color = s.edgeLight.toArgb(); cv.drawRect(0f, 0f, w.toFloat(), h.toFloat(), p)
+            p.color = s.edgeDark.toArgb(); cv.drawRect(0f, 0f, w - e, h - e, p)
             // Nudge the background by 0..3 (of 255) every frame so no two frames share pixels; invisible to the eye
             val n = (lcdFrame++ and 3)
             p.color = (0xFF000000.toInt() or (n shl 16) or (n shl 8) or n); cv.drawRect(e, e, w - e, h - e, p)
